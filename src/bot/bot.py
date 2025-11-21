@@ -10,8 +10,8 @@ from aiogram.enums import ParseMode
 from aiogram.filters import CommandStart, Command, CommandObject
 from aiogram.types import Message
 
-from src.bot.anti_flood import AntiFloodMiddleware
-from src.llm.answer import write_answer
+from bot.anti_flood import AntiFloodMiddleware
+from llm.answer import write_answer
 
 # Bot token can be obtained via https://t.me/BotFather
 TOKEN = getenv("BOT_TOKEN")

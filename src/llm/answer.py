@@ -1,5 +1,5 @@
-from src.llm.config import GENERATION_CONFIG
-from src.llm.prompts.explain import EXPLAIN_PROMPT
+from llm.config import GENERATION_CONFIG
+from llm.prompts.explain import EXPLAIN_PROMPT
 
 from tenacity import retry, stop_after_attempt, wait_fixed, retry_if_exception_type
 
