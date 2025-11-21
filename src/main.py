@@ -27,8 +27,8 @@ async def on_startup(bot: Bot) -> None:
 async def on_shutdown(bot: Bot) -> None:
     if ADMIN_ID:
         await bot.send_message(ADMIN_ID, "Bot stopped!")
-    await bot.delete_webhook(drop_pending_updates=True)
-    await bot.session.close()
+    # await bot.delete_webhook(drop_pending_updates=True)
+    # await bot.session.close()
 
 def main() -> None:
     # Dispatcher is a root router
