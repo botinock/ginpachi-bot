@@ -20,7 +20,8 @@ WEBHOOK_SECRET_TOKEN = getenv("WEBHOOK_SECRET_TOKEN")
 async def on_startup(bot: Bot) -> None:
     if ADMIN_ID:
         await bot.send_message(ADMIN_ID, "Bot started!")
-    await set_commands(bot)
+    set_success = await set_commands(bot)
+    await bot.send_message(ADMIN_ID, f"Starting commands success: {set_success}")
     await bot.set_webhook(f"{BASE_URL}{WEBHOOK_PATH}", secret_token=WEBHOOK_SECRET_TOKEN)
 
 async def on_shutdown(bot: Bot) -> None:

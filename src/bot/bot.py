@@ -33,4 +33,4 @@ async def set_commands(bot: Bot):
         BotCommand(command='explain', description='Explain a word'),
         BotCommand(command='ex', description='Explain a word')
         ]
-    await bot.set_my_commands(commands, BotCommandScopeDefault())
+    return await bot.set_my_commands(commands, BotCommandScopeDefault())
