@@ -7,6 +7,7 @@ from aiogram.types import Message, BotCommand, BotCommandScopeDefault
 
 from bot.anti_flood import AntiFloodMiddleware
 from llm.answer import write_answer
+from bot.help import help_message, start_message
 
 
 client = genai.Client().aio
@@ -16,9 +17,13 @@ router.message.middleware(AntiFloodMiddleware(rate_limit=5.0))
 
 @router.message(CommandStart())
 async def command_start_handler(message: Message) -> None:
-    await message.answer(f"Hello, {html.bold(message.from_user.full_name)}!")
+    await message.answer(start_message())
 
-@router.message(Command('explain', 'ex'))
+@router.message(Command('help'))
+async def command_help_handler(message: Message) -> None:
+    await message.answer(help_message())
+
+@router.message(Command('word', 'ex'))
 async def command_explain_handler(message: Message, command: CommandObject) -> None:
     text = command.args or (message.reply_to_message.text if message.reply_to_message else None)
     if not text:
@@ -30,7 +35,7 @@ async def command_explain_handler(message: Message, command: CommandObject) -> N
 
 async def set_commands(bot: Bot):
     commands = [
-        BotCommand(command='explain', description='Explain a word'),
-        BotCommand(command='ex', description='Explain a word')
+        BotCommand(command='help', description='Викликати підказку'),
+        BotCommand(command='word', description='Пояснити японське слово українською'),
         ]
     return await bot.set_my_commands(commands, BotCommandScopeDefault())
