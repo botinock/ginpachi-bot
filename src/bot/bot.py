@@ -28,7 +28,6 @@ async def command_explain_handler(message: Message, command: CommandObject) -> N
     text_arg = command.args
     quote_text = message.quote.text if message.reply_to_message else None
     reply_text = message.reply_to_message.text if message.reply_to_message else None
-    message.reply_to_message.quote
     text = text_arg or quote_text or reply_text
     if not text:
         await message.reply("Введи слово, яке треба пояснити.")
