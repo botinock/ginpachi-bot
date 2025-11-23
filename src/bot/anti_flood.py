@@ -23,6 +23,7 @@ class AntiFloodMiddleware(BaseMiddleware):
                 if (now - last_request_time) < self.rate_limit:
                     # User is sending requests too fast
                     # await event.answer(f"Please wait {self.rate_limit - (now - last_request_time):.2f} seconds before sending another message.")
+                    await event.answer("Зачекай")
                     return  # Stop processing the event
             
             self.users_last_request[user_id] = now
