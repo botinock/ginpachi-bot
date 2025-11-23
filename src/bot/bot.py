@@ -1,25 +1,33 @@
+from os import getenv
+
 from google import genai
 
 from aiogram import Bot, Router
-
 from aiogram.filters import CommandStart, Command, CommandObject
 from aiogram.types import Message, BotCommand, BotCommandScopeDefault
+from aiogram.client.default import DefaultBotProperties
+from aiogram.enums import ParseMode
+
 
 from bot.anti_flood import AntiFloodMiddleware
-
 from bot.filters import IsAdmin
 from bot.message_processor import MessageProcessor
 from bot.help import help_message, start_message
 from bot.user_processor import UserProcessor
+
 from db.client import get_db_client
 from db.models import UserRole
 from db.user_repository import UserRepository
+
 from llm.answer import write_answer
 
+BOT_TOKEN = getenv("BOT_TOKEN")
+ADMIN_ID = getenv('ADMIN_ID')
 
 llm_client = genai.Client().aio
 db_client = get_db_client()
 user_repository = UserRepository(db_client)
+bot = Bot(token=BOT_TOKEN, default=DefaultBotProperties(parse_mode=ParseMode.HTML))
 
 router = Router()
 router.message.middleware(AntiFloodMiddleware(rate_limit=5.0))
@@ -40,6 +48,7 @@ async def command_explain_handler(message: Message, command: CommandObject) -> N
     if not user:
         user = UserProcessor.create_user_from_message(message)
         await user_repository.create_user(user)
+        await bot.send_message(ADMIN_ID, f"Новий юзер! {user.user_id} (@{user.username})")
     
     if user.username != message.from_user.username:
         user = UserProcessor.update_user_username(user, message)

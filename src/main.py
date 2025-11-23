@@ -4,10 +4,8 @@ import sys
 from aiogram import Bot, Dispatcher
 from aiohttp import web
 from aiogram.webhook.aiohttp_server import SimpleRequestHandler, setup_application
-from aiogram.client.default import DefaultBotProperties
-from aiogram.enums import ParseMode
 
-from bot.bot import router, set_commands
+from bot.bot import router, bot, set_commands
 
 ADMIN_ID = getenv('ADMIN_ID')
 BOT_TOKEN = getenv("BOT_TOKEN")
@@ -39,9 +37,6 @@ def main() -> None:
     # Register startup hook to initialize webhook
     dp.startup.register(on_startup)
     dp.shutdown.register(on_shutdown)
-
-    # Initialize Bot instance with default bot properties which will be passed to all API calls
-    bot = Bot(token=BOT_TOKEN, default=DefaultBotProperties(parse_mode=ParseMode.HTML))
 
     # Create aiohttp.web.Application instance
     app = web.Application()
