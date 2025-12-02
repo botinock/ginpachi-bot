@@ -33,3 +33,10 @@ class User(BaseModel):
         """Looks up the daily limit based on the user's role."""
         # Use .value to get the string key for the lookup (e.g., "admin")
         return ROLE_LIMITS.get(self.role, ROLE_LIMITS[UserRole.USER])
+
+
+class Chat(BaseModel):
+    chat_id: int
+    message_count: int = 0
+    created_at: datetime = datetime.now(timezone.utc)
+    updated_at: datetime = datetime.now(timezone.utc)
