@@ -69,6 +69,11 @@ async def update_chat(message: Message) -> None:
         chat = ChatProcessor.create_chat_from_message(message)
         await chat_repository.create_chat(chat)
         await bot.send_message(ADMIN_ID, f"Новий чат! {chat_id}")
+    
+    if chat.chat_username != message.chat.username or chat.chat_name != message.chat.title:
+        chat = ChatProcessor.update_chat_title_and_username(chat, message)
+        await chat_repository.update_chat(chat_id, chat)
+
     await chat_repository.increment_message_count(chat_id)
 
 
@@ -173,13 +178,13 @@ async def command_send_mail_handler(message: Message, command: CommandObject) ->
         try:
             await bot.send_message(user.user_id, mail_text)
         except Exception as e:
-            await bot.send_message(ADMIN_ID, f"Не вдалося надіслати повідомлення користувачу {user.username}: {e}")
+            await bot.send_message(ADMIN_ID, f"Не вдалося надіслати повідомлення користувачу {user.username}, {user.user_id}: {e}")
     chats = await chat_repository.list_chats(limit=1000)  # limit to first 1000 chats
     for chat in chats:
         try:
             await bot.send_message(chat.chat_id, mail_text)
         except Exception as e:
-            await bot.send_message(ADMIN_ID, f"Не вдалося надіслати повідомлення чату {chat.chat_id}: {e}")
+            await bot.send_message(ADMIN_ID, f"Не вдалося надіслати повідомлення чату {chat.chat_username or chat.chat_name}, {chat.chat_id}: {e}")
     await message.answer("Розсилка завершена.")
 
 

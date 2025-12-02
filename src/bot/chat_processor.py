@@ -10,5 +10,13 @@ class ChatProcessor:
     @staticmethod
     def create_chat_from_message(message: Message) -> Chat:
         return Chat(
-            chat_id=message.chat.id
+            chat_id=message.chat.id,
+            chat_name=message.chat.title,
+            chat_username=message.chat.username
         )
+
+    @staticmethod
+    def update_chat_title_and_username(chat: Chat, message: Message) -> Chat:
+        chat.chat_name = message.chat.title
+        chat.chat_username = message.chat.username
+        return chat
