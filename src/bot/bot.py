@@ -173,7 +173,7 @@ async def command_send_mail_handler(message: Message, command: CommandObject) ->
         try:
             await bot.send_message(user.user_id, mail_text)
         except Exception as e:
-            await bot.send_message(ADMIN_ID, f"Не вдалося надіслати повідомлення користувачу {user.user_id}: {e}")
+            await bot.send_message(ADMIN_ID, f"Не вдалося надіслати повідомлення користувачу {user.username}: {e}")
     chats = await chat_repository.list_chats(limit=1000)  # limit to first 1000 chats
     for chat in chats:
         try:
