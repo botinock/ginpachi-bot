@@ -107,15 +107,13 @@ async def command_explain_handler(message: Message, command: CommandObject) -> N
 
 @router.message(Command('profile'))
 async def command_profile_handler(message: Message) -> None:
+    await update_user(message)
+    await update_chat(message)
     user_id = UserProcessor.get_user_id_from_message(message)
     user = await user_repository.get_user(user_id)
     if not user:
         await message.answer("В тебе ще немає профілю.")
         return
-    
-    if user.username != message.from_user.username:
-        user = UserProcessor.update_user_username(user, message)
-        await user_repository.update_user(user)
     
     profile_text = UserProcessor.get_user_profile_text(user)
     await message.answer(profile_text)
