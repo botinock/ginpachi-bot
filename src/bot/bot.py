@@ -190,12 +190,12 @@ async def command_send_mail_handler(message: Message, command: CommandObject) ->
     if error_user_list:
         error_lines = ["Не вдалося надіслати повідомлення наступним користувачам:"]
         for user in error_user_list:
-            error_lines.append(f"- {user.username}, {user.user_id}")
+            error_lines.append(f"- @{user.username}, {user.user_id}")
         await bot.send_message(ADMIN_ID, "\n".join(error_lines))
     if error_chat_list:
         error_lines = ["Не вдалося надіслати повідомлення наступним чатам:"]
         for chat in error_chat_list:
-            error_lines.append(f"- {chat.chat_username or chat.chat_name}, {chat.chat_id}")
+            error_lines.append(f"- {('@' + chat.chat_username) or chat.chat_name}, {chat.chat_id}")
         await bot.send_message(ADMIN_ID, "\n".join(error_lines))
     await message.answer("Розсилка завершена.")
 
