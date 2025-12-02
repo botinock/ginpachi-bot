@@ -20,3 +20,11 @@ class ChatProcessor:
         chat.chat_name = message.chat.title
         chat.chat_username = message.chat.username
         return chat
+
+    @staticmethod
+    def get_chat_username_from_message(message: Message) -> str | None:
+        return message.chat.username
+    
+    @staticmethod
+    def get_chat_name_from_message(message: Message) -> str | None:
+        return message.chat.title

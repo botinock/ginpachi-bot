@@ -44,7 +44,7 @@ async def update_user(message: Message) -> User | None:
         await user_repository.create_user(user)
         await bot.send_message(ADMIN_ID, f"Новий юзер! {user.user_id} (@{user.username})")
     
-    if user.username != message.from_user.username:
+    if user.username != UserProcessor.get_username_from_message(message):
         user = UserProcessor.update_user_username(user, message)
         await user_repository.update_user(user)
     
@@ -70,7 +70,7 @@ async def update_chat(message: Message) -> None:
         await chat_repository.create_chat(chat)
         await bot.send_message(ADMIN_ID, f"Новий чат! {chat_id}")
     
-    if chat.chat_username != message.chat.username or chat.chat_name != message.chat.title:
+    if chat.chat_username != ChatProcessor.get_chat_username_from_message(message) or chat.chat_name != ChatProcessor.get_chat_name_from_message(message):
         chat = ChatProcessor.update_chat_title_and_username(chat, message)
         await chat_repository.update_chat(chat_id, chat)
 

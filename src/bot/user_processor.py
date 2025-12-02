@@ -24,6 +24,10 @@ class UserProcessor:
         )
     
     @staticmethod
+    def get_username_from_message(message: Message) -> str | None:
+        return message.from_user.username
+    
+    @staticmethod
     def update_user_username(user: User, message: Message) -> User:
         user.username = message.from_user.username
         return user
