@@ -75,10 +75,14 @@ async def process_chat(message: Message) -> None:
 @router.message(CommandStart())
 async def command_start_handler(message: Message) -> None:
     await message.answer(start_message())
+    await process_user(message)
+    await process_chat(message)
 
 @router.message(Command('help'))
 async def command_help_handler(message: Message) -> None:
     await message.answer(help_message())
+    await process_user(message)
+    await process_chat(message)
 
 @router.message(Command('word', 'ex'))
 async def command_explain_handler(message: Message, command: CommandObject) -> None:
