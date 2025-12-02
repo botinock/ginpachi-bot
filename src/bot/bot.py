@@ -68,7 +68,7 @@ async def update_chat(message: Message) -> None:
     if not chat:
         chat = ChatProcessor.create_chat_from_message(message)
         await chat_repository.create_chat(chat)
-        await bot.send_message(ADMIN_ID, f"Новий чат! {chat_id}")
+        await bot.send_message(ADMIN_ID, f"Новий чат! {('@' + chat.chat_username) or chat.chat_name}, {chat.chat_id}")
     
     if chat.chat_username != ChatProcessor.get_chat_username_from_message(message) or chat.chat_name != ChatProcessor.get_chat_name_from_message(message):
         chat = ChatProcessor.update_chat_title_and_username(chat, message)
