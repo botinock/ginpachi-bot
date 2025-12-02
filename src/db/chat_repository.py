@@ -9,7 +9,7 @@ from db.models import Chat
 class ChatRepository:
     def __init__(self, client: AsyncClient):
         self.client = client
-        self.collection = self.client.collection(getenv('CHAT_COLLECTION'))
+        self.collection = self.client.collection(getenv('CHATS_COLLECTION'))
     
     async def get_chat(self, chat_id: int) -> dict | None:
         doc = await self.collection.document(str(chat_id)).get()
