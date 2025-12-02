@@ -14,10 +14,12 @@ from bot.filters import IsAdmin
 from bot.message_processor import MessageProcessor
 from bot.help import help_message, start_message
 from bot.user_processor import UserProcessor
+from bot.chat_processor import ChatProcessor
 
 from db.client import get_db_client
-from db.models import UserRole
+from db.models import User, UserRole, Chat
 from db.user_repository import UserRepository
+from db.chat_repository import ChatRepository
 
 from llm.answer import write_answer
 
@@ -27,22 +29,14 @@ ADMIN_ID = getenv('ADMIN_ID')
 llm_client = genai.Client().aio
 db_client = get_db_client()
 user_repository = UserRepository(db_client)
+chat_repository = ChatRepository(db_client)
 bot = Bot(token=BOT_TOKEN, default=DefaultBotProperties(parse_mode=ParseMode.HTML))
 
 router = Router()
 router.message.middleware(AntiFloodMiddleware(rate_limit=5.0))
 
 
-@router.message(CommandStart())
-async def command_start_handler(message: Message) -> None:
-    await message.answer(start_message())
-
-@router.message(Command('help'))
-async def command_help_handler(message: Message) -> None:
-    await message.answer(help_message())
-
-@router.message(Command('word', 'ex'))
-async def command_explain_handler(message: Message, command: CommandObject) -> None:
+async def process_user(message: Message) -> User | None:
     user_id = UserProcessor.get_user_id_from_message(message)
     user = await user_repository.get_user(user_id)
     if not user:
@@ -61,6 +55,36 @@ async def command_explain_handler(message: Message, command: CommandObject) -> N
     can_make_request, error_message = UserProcessor.can_user_make_request(user)
     if not can_make_request:
         await message.reply(error_message)
+        return
+    
+    return user
+
+
+async def process_chat(message: Message) -> None:
+    chat_id = ChatProcessor.get_chat_id_from_message(message)
+    if chat_id is None:
+        return
+    chat = await chat_repository.get_chat(chat_id)
+    if not chat:
+        chat = ChatProcessor.create_chat_from_message(message)
+        await chat_repository.create_chat(chat)
+        await bot.send_message(ADMIN_ID, f"Новий чат! {chat_id}")
+    await chat_repository.increment_message_count(chat_id)
+
+
+@router.message(CommandStart())
+async def command_start_handler(message: Message) -> None:
+    await message.answer(start_message())
+
+@router.message(Command('help'))
+async def command_help_handler(message: Message) -> None:
+    await message.answer(help_message())
+
+@router.message(Command('word', 'ex'))
+async def command_explain_handler(message: Message, command: CommandObject) -> None:
+    user = await process_user(message)
+    await process_chat(message)
+    if not user:
         return
 
     text = MessageProcessor.process_message(message, command)
@@ -106,6 +130,16 @@ async def command_top_daily_requests_handler(message: Message) -> None:
     for idx, user in enumerate(top_users, start=1):
         username_display = f"@{user.username}" if user.username else f"User ID: {user.user_id}"
         response_lines.append(f"{idx}. {username_display}: {user.request_count}")
+    response_text = "\n".join(response_lines)
+    await message.answer(response_text)
+
+
+@router.message(Command('top_chats'), IsAdmin())
+async def command_top_chats_handler(message: Message) -> None:
+    top_chats = await chat_repository.list_top_chats_by_messages(limit=10)
+    response_lines = ["Топ чатів за кількістю повідомлень:"]
+    for idx, chat in enumerate(top_chats, start=1):
+        response_lines.append(f"{idx}. Chat ID: {chat['chat_id']}: {chat['message_count']}")
     response_text = "\n".join(response_lines)
     await message.answer(response_text)
 

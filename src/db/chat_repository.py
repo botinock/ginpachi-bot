@@ -3,6 +3,8 @@ from os import getenv
 
 from google.cloud.firestore import AsyncClient, Increment
 
+from db.models import Chat
+
 
 class ChatRepository:
     def __init__(self, client: AsyncClient):
@@ -14,8 +16,8 @@ class ChatRepository:
         if doc.exists:
             return doc.to_dict()
     
-    async def create_chat(self, chat_data: dict) -> None:
-        await self.collection.document(str(chat_data['chat_id'])).set(chat_data)
+    async def create_chat(self, chat: Chat) -> None:
+        await self.collection.document(str(chat.chat_id)).set(chat.model_dump())
     
     async def update_chat(self, chat_id: int, chat_data: dict) -> None:
         await self.collection.document(str(chat_id)).update(chat_data)
