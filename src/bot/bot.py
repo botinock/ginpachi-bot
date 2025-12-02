@@ -171,18 +171,32 @@ async def command_send_mail_handler(message: Message, command: CommandObject) ->
     if not mail_text:
         await message.reply("Введи текст розсилки.")
         return
+    
+    error_user_list: list[User] = []
+    error_chat_list: list[Chat] = []
+
     users = await user_repository.list_top_users_by_requests(limit=1000)  # limit to first 1000 users
     for user in users:
         try:
             await bot.send_message(user.user_id, mail_text)
         except Exception as e:
-            await bot.send_message(ADMIN_ID, f"Не вдалося надіслати повідомлення користувачу {user.username}, {user.user_id}: {e}")
+            error_user_list.append(user)
     chats = await chat_repository.list_chats(limit=1000)  # limit to first 1000 chats
     for chat in chats:
         try:
             await bot.send_message(chat.chat_id, mail_text)
         except Exception as e:
-            await bot.send_message(ADMIN_ID, f"Не вдалося надіслати повідомлення чату {chat.chat_username or chat.chat_name}, {chat.chat_id}: {e}")
+            error_chat_list.append(chat)
+    if error_user_list:
+        error_lines = ["Не вдалося надіслати повідомлення наступним користувачам:"]
+        for user in error_user_list:
+            error_lines.append(f"- {user.username}, {user.user_id}")
+        await bot.send_message(ADMIN_ID, "\n".join(error_lines))
+    if error_chat_list:
+        error_lines = ["Не вдалося надіслати повідомлення наступним чатам:"]
+        for chat in error_chat_list:
+            error_lines.append(f"- {chat.chat_username or chat.chat_name}, {chat.chat_id}")
+        await bot.send_message(ADMIN_ID, "\n".join(error_lines))
     await message.answer("Розсилка завершена.")
 
 
