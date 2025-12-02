@@ -14,7 +14,7 @@ class ChatRepository:
     async def get_chat(self, chat_id: int) -> dict | None:
         doc = await self.collection.document(str(chat_id)).get()
         if doc.exists:
-            return doc.to_dict()
+            return Chat.model_validate(doc.to_dict())
     
     async def create_chat(self, chat: Chat) -> None:
         await self.collection.document(str(chat.chat_id)).set(chat.model_dump())
