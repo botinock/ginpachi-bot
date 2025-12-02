@@ -148,7 +148,7 @@ async def command_top_chats_handler(message: Message) -> None:
     top_chats = await chat_repository.list_top_chats_by_messages(limit=10)
     response_lines = ["Топ чатів за кількістю повідомлень:"]
     for idx, chat in enumerate(top_chats, start=1):
-        response_lines.append(f"{idx}. Chat ID: {chat['chat_id']}: {chat['message_count']}")
+        response_lines.append(f"{idx}. {chat.chat_username or chat.chat_name}, {chat.chat_id}: {chat.message_count}")
     response_text = "\n".join(response_lines)
     await message.answer(response_text)
 
