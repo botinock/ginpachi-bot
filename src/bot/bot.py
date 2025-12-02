@@ -36,7 +36,7 @@ router = Router()
 router.message.middleware(AntiFloodMiddleware(rate_limit=5.0))
 
 
-async def process_user(message: Message) -> User | None:
+async def update_user(message: Message) -> User | None:
     user_id = UserProcessor.get_user_id_from_message(message)
     user = await user_repository.get_user(user_id)
     if not user:
@@ -60,7 +60,7 @@ async def process_user(message: Message) -> User | None:
     return user
 
 
-async def process_chat(message: Message) -> None:
+async def update_chat(message: Message) -> None:
     chat_id = ChatProcessor.get_chat_id_from_message(message)
     if chat_id is None:
         return
@@ -75,19 +75,19 @@ async def process_chat(message: Message) -> None:
 @router.message(CommandStart())
 async def command_start_handler(message: Message) -> None:
     await message.answer(start_message())
-    await process_user(message)
-    await process_chat(message)
+    await update_user(message)
+    await update_chat(message)
 
 @router.message(Command('help'))
 async def command_help_handler(message: Message) -> None:
     await message.answer(help_message())
-    await process_user(message)
-    await process_chat(message)
+    await update_user(message)
+    await update_chat(message)
 
 @router.message(Command('word', 'ex'))
 async def command_explain_handler(message: Message, command: CommandObject) -> None:
-    user = await process_user(message)
-    await process_chat(message)
+    user = await update_user(message)
+    await update_chat(message)
     if not user:
         return
 
