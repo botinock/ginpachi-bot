@@ -19,17 +19,17 @@ class ChatRepository:
     async def create_chat(self, chat: Chat) -> None:
         await self.collection.document(str(chat.chat_id)).set(chat.model_dump())
     
-    async def update_chat(self, chat_id: int, chat_data: dict) -> None:
-        await self.collection.document(str(chat_id)).update(chat_data)
+    async def update_chat(self, chat_id: int, chat: Chat) -> None:
+        await self.collection.document(str(chat_id)).update(chat.model_dump())
     
     async def delete_chat(self, chat_id: int) -> None:
         await self.collection.document(str(chat_id)).delete()
     
-    async def list_chats(self, limit: int = 10) -> list[dict]:
+    async def list_chats(self, limit: int = 10) -> list[Chat]:
         query = self.collection.limit(limit)
         chats: list[dict] = []
         async for doc in query.stream():
-            chats.append(doc.to_dict())
+            chats.append(Chat.model_validate(doc.to_dict()))
         return chats
     
     async def increment_message_count(self, chat_id: int, increment: int = 1) -> None:
@@ -46,9 +46,9 @@ class ChatRepository:
             'updated_at': datetime.now(timezone.utc)
         })
     
-    async def list_top_chats_by_messages(self, limit: int = 10) -> list[dict]:
+    async def list_top_chats_by_messages(self, limit: int = 10) -> list[Chat]:
         query = self.collection.order_by('message_count', direction='DESCENDING').limit(limit)
         chats: list[dict] = []
         async for doc in query.stream():
-            chats.append(doc.to_dict())
+            chats.append(Chat.model_validate(doc.to_dict()))
         return chats

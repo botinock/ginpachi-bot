@@ -162,6 +162,27 @@ async def command_set_role_handler(message: Message, command: CommandObject) -> 
     await message.answer("Зроблено.")
 
 
+@router.message(Command('send_mail'), IsAdmin())
+async def command_send_mail_handler(message: Message, command: CommandObject) -> None:
+    mail_text = command.args
+    if not mail_text:
+        await message.reply("Введи текст розсилки.")
+        return
+    users = await user_repository.list_top_users_by_requests(limit=1000)  # limit to first 1000 users
+    for user in users:
+        try:
+            await bot.send_message(user.user_id, mail_text)
+        except Exception as e:
+            await bot.send_message(ADMIN_ID, f"Не вдалося надіслати повідомлення користувачу {user.user_id}: {e}")
+    chats = await chat_repository.list_chats(limit=1000)  # limit to first 1000 chats
+    for chat in chats:
+        try:
+            await bot.send_message(chat.chat_id, mail_text)
+        except Exception as e:
+            await bot.send_message(ADMIN_ID, f"Не вдалося надіслати повідомлення чату {chat.chat_id}: {e}")
+    await message.answer("Розсилка завершена.")
+
+
 async def set_commands(bot: Bot):
     commands = [
         BotCommand(command='help', description='Викликати підказку'),
