@@ -134,11 +134,13 @@ async def command_top_requests_handler(message: Message) -> None:
 async def command_top_daily_requests_handler(message: Message) -> None:
     top_users = await user_repository.list_top_users_by_daily_requests(limit=10)
     response_lines = ["Топ користувачів за кількістю запитів сьогодні:"]
-    for idx, user in enumerate(top_users, start=1):
+    idx = 1
+    for user in top_users:
         if user.updated_at.date() != message.date.date():
             continue
         username_display = f"@{user.username}" if user.username else f"User ID: {user.user_id}"
         response_lines.append(f"{idx}. {username_display}: {user.request_count}")
+        idx += 1
     response_text = "\n".join(response_lines)
     await message.answer(response_text)
 
