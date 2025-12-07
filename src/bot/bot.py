@@ -102,11 +102,15 @@ async def command_explain_handler(message: Message, command: CommandObject) -> N
     if not text:
         await message.reply("Введи слово, яке треба пояснити.")
         return
-    answer = await write_answer(llm_client, text)
+    answer, should_search_image = await write_answer(llm_client, text)
     reply_message = await message.reply(answer)
-    image_url = await image_provider.lookup_image(text)
-    media = await image_provider.create_input_media_photo(image_url, answer)
-    await reply_message.edit_media(media=media)
+    if should_search_image:
+        image_url = await image_provider.lookup_image(text)
+        try:
+            media = await image_provider.create_input_media_photo(image_url, answer)
+            await reply_message.edit_media(media=media)
+        except Exception as e:
+            print(f"Failed to send image for word '{text}' from url {image_url}: {e}")
 
     await user_repository.increment_request_count(user.user_id)
 
