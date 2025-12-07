@@ -8,13 +8,13 @@ from aiogram.types import Message, BotCommand, BotCommandScopeDefault
 from aiogram.client.default import DefaultBotProperties
 from aiogram.enums import ParseMode
 
-
 from bot.anti_flood import AntiFloodMiddleware
 from bot.filters import IsAdmin
 from bot.message_processor import MessageProcessor
 from bot.help import help_message, start_message
 from bot.user_processor import UserProcessor
 from bot.chat_processor import ChatProcessor
+from bot.image_provider import ImageProvider
 
 from db.client import get_db_client
 from db.models import User, UserRole, Chat
@@ -34,6 +34,8 @@ bot = Bot(token=BOT_TOKEN, default=DefaultBotProperties(parse_mode=ParseMode.HTM
 
 router = Router()
 router.message.middleware(AntiFloodMiddleware(rate_limit=5.0))
+
+image_provider = ImageProvider()
 
 
 async def update_user(message: Message) -> User | None:
@@ -101,7 +103,11 @@ async def command_explain_handler(message: Message, command: CommandObject) -> N
         await message.reply("Введи слово, яке треба пояснити.")
         return
     answer = await write_answer(llm_client, text)
-    await message.reply(answer)
+    reply_message = await message.reply(answer)
+    image_url = await image_provider.lookup_image(text)
+    media = await image_provider.create_input_media_photo(image_url, answer)
+    await reply_message.edit_media(media=media)
+
     await user_repository.increment_request_count(user.user_id)
 
 
