@@ -12,7 +12,7 @@ from google.genai.client import AsyncClient
 @retry(stop=stop_after_attempt(3), wait=wait_fixed(2), retry=retry_if_exception_type(ServerError))
 async def write_answer(client: AsyncClient, text: str) -> tuple[str, bool]:
     response = await client.models.generate_content(
-        model="gemini-2.5-flash",
+        model="gemini-3-flash-preview",
         contents=EXPLAIN_PROMPT.format(word=text),
         config=GENERATION_CONFIG.model_copy(update={
             "response_mime_type": "application/json",

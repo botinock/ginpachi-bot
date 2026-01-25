@@ -15,7 +15,7 @@ class ImageProvider:
     async def lookup_image(self, word: str) -> str:
         # Placeholder implementation
         params = {
-            'q': word,
+            'q': f'{word}とは',
             'cx': IMAGE_CX,
             'key': IMAGE_API_KEY,
             'searchType': 'image',
