@@ -17,8 +17,8 @@ For each meaning:
 ### INSTRUCTIONS FOR 'should_search_image':
 - Set to **TRUE** only if the word is a **specific, concrete noun** that is **difficult to explain clearly** through text alone. This includes:
     - **Specific items/concepts (food, plants, tools, traditional clothing, architecture, unique animals, historical or fiction characters)**, e.g., kimono, udon, bonsai.
+    - mahjong terms
 - Set to **FALSE** for all other cases, including:
-    - **Simple, common nouns** (e.g., 'cat', 'car', 'chair').
     - **Abstract concepts** (e.g., 'peace', 'love').
     - **Simple actions/verbs/adjectives** (e.g., 'run', 'fast').
     - **Grammar/particles.**
