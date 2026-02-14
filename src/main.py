@@ -6,8 +6,9 @@ from aiohttp import web
 from aiogram.webhook.aiohttp_server import SimpleRequestHandler, setup_application
 
 from bot.bot import router, bot, set_commands
+from mahjong.handlers import router as mahjong_router
 
-ADMIN_ID = getenv('ADMIN_ID')
+ADMIN_ID = getenv("ADMIN_ID")
 BOT_TOKEN = getenv("BOT_TOKEN")
 HOST = getenv("HOST")
 PORT = int(getenv("PORT"))
@@ -15,12 +16,16 @@ WEBHOOK_PATH = getenv("WEBHOOK_PATH")
 BASE_URL = getenv("BASE_URL")
 WEBHOOK_SECRET_TOKEN = getenv("WEBHOOK_SECRET_TOKEN")
 
+
 async def on_startup(bot: Bot) -> None:
     if ADMIN_ID:
         await bot.send_message(ADMIN_ID, "Bot started!")
     set_success = await set_commands(bot)
     await bot.send_message(ADMIN_ID, f"Starting commands success: {set_success}")
-    await bot.set_webhook(f"{BASE_URL}{WEBHOOK_PATH}", secret_token=WEBHOOK_SECRET_TOKEN)
+    await bot.set_webhook(
+        f"{BASE_URL}{WEBHOOK_PATH}", secret_token=WEBHOOK_SECRET_TOKEN
+    )
+
 
 async def on_shutdown(bot: Bot) -> None:
     if ADMIN_ID:
@@ -28,11 +33,13 @@ async def on_shutdown(bot: Bot) -> None:
     # await bot.delete_webhook(drop_pending_updates=True)
     # await bot.session.close()
 
+
 def main() -> None:
     # Dispatcher is a root router
     dp = Dispatcher()
     # ... and all other routers should be attached to Dispatcher
     dp.include_router(router)
+    dp.include_router(mahjong_router)
 
     # Register startup hook to initialize webhook
     dp.startup.register(on_startup)
@@ -57,6 +64,7 @@ def main() -> None:
 
     # And finally start webserver
     web.run_app(app, host=HOST, port=PORT)
+
 
 if __name__ == "__main__":
     logging.basicConfig(level=logging.INFO, stream=sys.stdout)
