@@ -123,18 +123,23 @@ class MahjongService:
         # SYNC: Populate username and display_name from Player records in DB
         # This ensures MatchPlayer snapshots the current player identity
         player_records = {}
+        parsed_by_id = {}
         for parsed_player in parsed_players:
-            if parsed_player.id and parsed_player.id not in player_records:
-                player_record = await self.player_repo.get_player(parsed_player.id)
-                if player_record:
-                    player_records[parsed_player.id] = player_record
+            if parsed_player.id:
+                parsed_by_id[parsed_player.id] = parsed_player
+                if parsed_player.id not in player_records:
+                    player_record = await self.player_repo.get_player(parsed_player.id)
+                    if player_record:
+                        player_records[parsed_player.id] = player_record
 
-        for match_player, parsed_player in zip(match_players, parsed_players):
-            if parsed_player.id in player_records:
+        # Match by ID instead of order (calculator returns sorted by score, not message order)
+        for match_player in match_players:
+            parsed_player = parsed_by_id.get(match_player.id)
+            if parsed_player and parsed_player.id in player_records:
                 player_record = player_records[parsed_player.id]
                 match_player.username = player_record.username or parsed_player.username
                 match_player.display_name = player_record.display_name or parsed_player.name or parsed_player.username
-            else:
+            elif parsed_player:
                 # Fallback if player record not found (shouldn't happen due to validation)
                 match_player.username = parsed_player.username.lower()
                 match_player.display_name = parsed_player.name or f"@{parsed_player.username}"
@@ -242,18 +247,23 @@ class MahjongService:
 
         # SYNC: Populate username and display_name from Player records in DB
         player_records = {}
+        parsed_by_id = {}
         for parsed_player in parsed_players:
-            if parsed_player.id and parsed_player.id not in player_records:
-                player_record = await self.player_repo.get_player(parsed_player.id)
-                if player_record:
-                    player_records[parsed_player.id] = player_record
+            if parsed_player.id:
+                parsed_by_id[parsed_player.id] = parsed_player
+                if parsed_player.id not in player_records:
+                    player_record = await self.player_repo.get_player(parsed_player.id)
+                    if player_record:
+                        player_records[parsed_player.id] = player_record
 
-        for match_player, parsed_player in zip(match_players, parsed_players):
-            if parsed_player.id in player_records:
+        # Match by ID instead of order (calculator returns sorted by score, not message order)
+        for match_player in match_players:
+            parsed_player = parsed_by_id.get(match_player.id)
+            if parsed_player and parsed_player.id in player_records:
                 player_record = player_records[parsed_player.id]
                 match_player.username = player_record.username or f"@{parsed_player.username}"
                 match_player.display_name = player_record.display_name or parsed_player.name or f"@{parsed_player.username}"
-            else:
+            elif parsed_player:
                 # Fallback
                 match_player.username = parsed_player.username.lower()
                 match_player.display_name = parsed_player.name or f"@{parsed_player.username}"
