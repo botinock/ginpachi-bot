@@ -6,7 +6,6 @@ from aiohttp import web
 from aiogram.webhook.aiohttp_server import SimpleRequestHandler, setup_application
 
 from bot.bot import router, bot, set_commands
-from mahjong.handlers import router as mahjong_router
 
 ADMIN_ID = getenv("ADMIN_ID")
 BOT_TOKEN = getenv("BOT_TOKEN")
@@ -39,7 +38,6 @@ def main() -> None:
     dp = Dispatcher()
     # ... and all other routers should be attached to Dispatcher
     dp.include_router(router)
-    dp.include_router(mahjong_router)
 
     # Register startup hook to initialize webhook
     dp.startup.register(on_startup)
