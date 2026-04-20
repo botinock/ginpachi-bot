@@ -119,10 +119,9 @@ async def command_explain_handler(message: Message, command: CommandObject) -> N
 async def plain_text_explain_handler(message: Message) -> None:
     user_id = UserProcessor.get_user_id_from_message(message)
     existing_user = await user_repository.get_user(user_id)
-    if existing_user and existing_user.role not in (UserRole.PREMIUM_USER, UserRole.ADMIN):
+    if existing_user and (existing_user.role != UserRole.PREMIUM_USER and existing_user.role != UserRole.ADMIN):
         await update_chat(message)
         return
-
     user = await update_user(message)
     await update_chat(message)
     if not user:
