@@ -2,7 +2,7 @@ from os import getenv
 
 from google import genai
 
-from aiogram import Bot, Router
+from aiogram import Bot, Router, F
 from aiogram.filters import CommandStart, Command, CommandObject
 from aiogram.types import Message, BotCommand, BotCommandScopeDefault
 from aiogram.client.default import DefaultBotProperties
@@ -102,6 +102,38 @@ async def command_explain_handler(message: Message, command: CommandObject) -> N
     if not text:
         await message.reply("Введи слово, яке треба пояснити.")
         return
+    answer, should_search_image = await write_answer(llm_client, text)
+    reply_message = await message.reply(answer)
+    if should_search_image:
+        image_url = await image_provider.lookup_image(text)
+        try:
+            media = await image_provider.create_input_media_photo(image_url, answer)
+            await reply_message.edit_media(media=media)
+        except Exception as e:
+            print(f"Failed to send image for word '{text}' from url {image_url}: {e}")
+
+    await user_repository.increment_request_count(user.user_id)
+
+
+@router.message(F.text, ~F.text.startswith('/'))
+async def plain_text_explain_handler(message: Message) -> None:
+    user_id = UserProcessor.get_user_id_from_message(message)
+    existing_user = await user_repository.get_user(user_id)
+    if existing_user and (existing_user.role != UserRole.PREMIUM_USER and existing_user.role != UserRole.ADMIN):
+        await update_chat(message)
+        return
+    user = await update_user(message)
+    await update_chat(message)
+    if not user:
+        return
+    if user.role not in (UserRole.PREMIUM_USER, UserRole.ADMIN):
+        return
+
+    text = message.text.strip() if message.text else None
+    if not text:
+        await message.reply("Введи слово, яке треба пояснити.")
+        return
+
     answer, should_search_image = await write_answer(llm_client, text)
     reply_message = await message.reply(answer)
     if should_search_image:
